@@ -725,15 +725,19 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# 替换 Debian 官方源为清华源
+RUN sed -i 's|http://deb.debian.org|https://mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list.d/debian.sources \
+ && sed -i 's|http://security.debian.org|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources
+
 # 安装系统依赖
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# 复制项目文件
+COPY . .
 
 # 安装 Python 依赖
 COPY pyproject.toml .
 RUN pip install --no-cache-dir -e ".[feishu]"
-
-# 复制项目文件
-COPY . .
 
 # 安装 Playwright
 RUN playwright install chromium && playwright install-deps chromium
